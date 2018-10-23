@@ -1,0 +1,24 @@
+{%extends 'title.html'%}
+
+{%block title%}菜鳥日常{%endblock%}
+
+{%block head%}
+<link rel="stylesheet" href="{{url_for('static',filename='css/question.css')}}">
+{%endblock%}
+
+{%block body%}
+<h3 class='page-title'>菜鳥日常</h3>
+    <form action="" method="POST">
+        <div class="form-container">
+            <div class="form-group"> 
+                <input type="text" placeholder="菜鳥行跡" name="title" class="form-control"> 
+            </div>
+            <div class="form-group"> 
+                <textarea name="content" rows="10" class="form-control" placeholder="說說您的背包經驗 :" class="form-control"></textarea>
+            </div>
+            <div class="form-group"> 
+                <button class="btn btn-primary btn-block">分享我的旅跡</button>
+            </div>
+        </div>  
+    </form>  
+{%endblock%}

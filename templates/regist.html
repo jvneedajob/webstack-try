@@ -1,0 +1,30 @@
+{%extends 'title.html'%}
+
+{%block title%}
+註冊頁面
+{%endblock%}
+
+{%block head%}
+<link rel="stylesheet" href="{{url_for('static',filename='css/login_regist.css')}}">
+{%endblock%}
+
+{%block body%}<h4 class="page-title">菜鳥們!! 踏出第一步，尋找未來~ 因為..<br>
+人生只有一次!
+</h4>
+<form action="" method="POST">
+    <div class="form-container">
+        <div class='form-group'>
+            <input type="text" class='form-control' placeholder="帳號" name='username'>
+        </div>
+        <div class='form-group'>
+            <input type="password" class='form-control' placeholder="密碼" name='password1'>
+        </div>
+        <div class='form-group'>
+            <input type="password" class='form-control' placeholder="確認密碼" name='password2'>
+        </div>
+        <div class='form-group'>
+            <button class="btn btn-primary btn-block">註冊</button>
+        </div>
+    </div>
+</form>
+{%endblock%}
