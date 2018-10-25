@@ -9,7 +9,7 @@ import config
 from model import User, Question,Answer
 from exts import db
 from decorators import login_required
-
+from sqlalchemy import or_
 
 app = Flask(__name__)
 app.config.from_object(config)
@@ -28,10 +28,11 @@ def login():
     else:     
         username = request.form.get('username')
         password = request.form.get('password')
-        user = User.query.filter(User.username == username,User.password == password).first()
-        if user:
+        user = User.query.filter(User.username == username).first()
+
+        if user and user.check_password(password):
             session['user_id'] = user.id
-            #31天內cookie存留
+            #31天(默認)內cookie存留
             session.permanent = True
             return redirect(url_for('index'))
         else:
@@ -45,21 +46,22 @@ def regist():
         username = request.form.get('username')
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
-
+        if username and password1:
         #確認帳號是否被使用
-        user = User.query.filter(User.username == username).first()
-        if user:
-            return u'該帳號已被註冊，請嘗試其他帳號'
-        else:
-            #password確認
-            if  password1 != password2:
-                return u'密碼不一致，請重新輸入密碼'
+            user = User.query.filter(User.username == username).first()
+            if user:
+                return u'該帳號已被註冊，請嘗試其他帳號'
             else:
-                user = User(username=username,password=password1)
-                db.session.add(user)
-                db.session.commit()
-                return redirect(url_for('login'))
-
+                #password確認
+                if  password1 != password2:
+                    return u'密碼不一致，請重新輸入密碼'
+                else:
+                    user = User(username=username,password=password1)
+                    db.session.add(user)
+                    db.session.commit()
+                    return redirect(url_for('login')) 
+        else:
+            return u'帳號或密碼不得為空!'   
 
 @app.route('/question/',methods = ["GET","POST"])
 @login_required
@@ -70,9 +72,7 @@ def question():
         title = request.form.get('title')
         content = request.form.get('content')
         question = Question(title=title,content=content)
-        user_id = session.get('user_id')
-        user = User.query.filter(User.id == user_id).first()
-        question.author = user
+        question.author = g.user
         db.session.add(question)
         db.session.commit()
         return redirect(url_for('index'))
@@ -90,9 +90,7 @@ def add_answer():
     question_id = request.form.get('question_id')
     create_time = Answer.query.order_by('-create_time').first()
     answer = Answer(content=content)
-    user_id = session['user_id']
-    user = User.query.filter(User.id == user_id).first()
-    answer.author = user
+    answer.author = g.user
     question = Question.query.filter(Question.id == question_id).first()
     answer.question = question
     db.session.add(answer)
@@ -100,6 +98,34 @@ def add_answer():
     
 
     return redirect(url_for('detail',question_id=question_id))
+@app.route('/logout/',methods = ["GET","POST"])
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.context_processor
+def my_context_processor():
+    if hasattr(g,'user'):
+            return {'user':g.user}
+    else:
+        return {}
+
+@app.before_request
+def my_before_request():
+    #user_id = session['user_id']
+    user_id = session.get('user_id')
+    if user_id:
+        user = User.query.filter(User.id == user_id).first()
+        if user:
+            g.user = user
+
+@app.route('/search/',methods = ["GET","POST"])
+def search():
+    q =request.args.get('q')
+    questions = Question.query.filter(or_(Question.title.contains(q),Question.content.contains(q))).order_by('-create_time')
+    
+    return render_template('index.html',questions=questions)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=71)

@@ -28,13 +28,18 @@
               <a class="nav-link" href="{{url_for('question')}}">菜鳥日常</a>
             </li>
           </ul>
-          <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="text" placeholder="輸入關鍵文字" aria-label="Search">
+          <form class="form-inline my-2 my-lg-0" style="margin-right:35px;" action="{{url_for('search')}}" method="get">
+            <input class="form-control mr-sm-2" name="q" type="text" placeholder="輸入關鍵文字" aria-label="Search">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜尋</button>
           </form>
-            <ul>
+            <ul style='margin-right:50px;'>
+              {%if user%}
+              <span><a href="#"><h5>{{user.username}}</h5></a></span> 
+              <span><a href="{{url_for('logout')}}">登出</a></span>
+              {%else%}
               <li><a href="{{url_for('login')}}">登錄</a></li>
               <li><a href="{{url_for('regist')}}">註冊</a></li>
+              {%endif%}
             </ul>
         </div>
     </nav>
