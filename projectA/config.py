@@ -3,6 +3,7 @@ import os
 from datetime import timedelta
 DEBUG = True
 
+#SERVER_NAME = 'freshfly.dev:5000'
 SECRET_KEY = os.urandom(24)
 PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 
@@ -17,3 +18,5 @@ SQLALCHEMY_DATABASE_URI="{}+{}://{}:{}@{}:{}/{}?charset=utf8".format(
     DIELECT,DRIVE,USERNAME,PASSWORD,HOST,PORT,DATABASE)
 
 SQLALCHEMY_TRACK_MODIFICATIONS = True
+os.environ['APP_SETTINGS'] ='config.DevelopmentConfig'
+PRESERVE_CONTEXT_ON_EXCEPTION = False

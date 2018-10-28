@@ -27,4 +27,9 @@
         </div>
     </div>
 </form>
+{%with messages = get_flashed_messages()%}
+    {%for message in messages%}
+        <h5 style="color: sienna">{{message}}</h5>
+    {%endfor%}
+{%endwith%}
 {%endblock%}

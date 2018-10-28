@@ -4,16 +4,20 @@ logo圖片引用:最酷的背包菜鳥log
 主要架構引用:bootstrap.com
 
 '''
-from flask import Flask,render_template, request, url_for , redirect, session, g
+from flask import Flask,render_template, request, url_for , redirect, session, g , flash
 import config
 from model import User, Question,Answer
 from exts import db
 from decorators import login_required
 from sqlalchemy import or_
+from auth.auth import bp
+
+
 
 app = Flask(__name__)
 app.config.from_object(config)
 db.init_app(app)
+app.register_blueprint(bp,url_prefix='/auth')
 
 @app.route('/')
 def index():
@@ -36,7 +40,8 @@ def login():
             session.permanent = True
             return redirect(url_for('index'))
         else:
-            return u'帳號或密碼輸入錯誤，請重新輸入!'
+            flash(u'帳號或密碼輸入錯誤，請重新輸入!')
+            return render_template('login.html')
 
 @app.route('/regist/',methods = ["GET","POST"])
 def regist():
@@ -50,18 +55,21 @@ def regist():
         #確認帳號是否被使用
             user = User.query.filter(User.username == username).first()
             if user:
-                return u'該帳號已被註冊，請嘗試其他帳號'
+                flash(u'該帳號已被註冊，請嘗試其他帳號')
+                return render_template('regist.html')
             else:
                 #password確認
                 if  password1 != password2:
-                    return u'密碼不一致，請重新輸入密碼'
+                    flash(u'密碼不一致，請重新輸入密碼!')
+                    return render_template('regist.html')
                 else:
                     user = User(username=username,password=password1)
                     db.session.add(user)
                     db.session.commit()
                     return redirect(url_for('login')) 
         else:
-            return u'帳號或密碼不得為空!'   
+            flash(u'帳號或密碼不得為空!')
+            return render_template('regist.html')
 
 @app.route('/question/',methods = ["GET","POST"])
 @login_required
@@ -80,7 +88,6 @@ def question():
 @app.route('/detail/<question_id>',methods = ["GET","POST"])
 def detail(question_id):
     quesiton_model = Question.query.filter(Question.id == question_id).first()
-    
     return render_template('detail.html',question=quesiton_model )
 
 @app.route('/add_answer/',methods = ["POST"])
@@ -128,4 +135,5 @@ def search():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=71)
+    app.run(host = '0.0.0.0',
+        port = 71  )

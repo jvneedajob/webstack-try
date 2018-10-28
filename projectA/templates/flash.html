@@ -1,0 +1,13 @@
+{%extends 'title.html'%}
+
+{%block title%}將跳轉到下個頁面...{%endblock%}
+
+{%block head%}{%endblock%}
+
+{%block body%}
+{%with messages = get_flashed_messages()%}
+    {%for message in messages%}
+        <h3>{{message}}</h3>
+    {%endfor%}
+{%endwith%}
+{%endblock%}
