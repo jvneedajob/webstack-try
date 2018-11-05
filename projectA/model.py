@@ -3,24 +3,31 @@
 from exts import db
 from datetime import datetime as dt 
 from werkzeug.security import generate_password_hash , check_password_hash
+from flask_login import UserMixin ,LoginManager
 
-class User(db.Model):
+
+class User(UserMixin,db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer,primary_key=True,autoincrement=True)
     username = db.Column(db.String(50),nullable=False)
     password = db.Column(db.String(100),nullable=False)
+    email = db.Column(db.String(30),nullable=False)
 
     def __init__(self,*args,**kwargs):
         username = kwargs.get('username')
         password = kwargs.get('password')
-
+        email = kwargs.get('email')
+        self.email = email
         self.username = username
         self.password = generate_password_hash(password)
+    # def set_password(self, password):
+    #     self.password_hash = generate_password_hash(password)
+
     def check_password(self,raw_password):
-        result = check_password_hash(self.password,raw_password)
+        result = check_password_hash(self.password_hash,raw_password)
         return result
 
-class Question(db.Model):
+class Question(UserMixin,db.Model):
     __tablename__ = 'question'
     id = db.Column(db.Integer,primary_key=True,autoincrement=True)
     title = db.Column(db.String(100),nullable=False)
@@ -29,7 +36,7 @@ class Question(db.Model):
     author_id = db.Column(db.Integer,db.ForeignKey('user.id'))
     author = db.relationship('User',backref=db.backref('questions'))
 
-class Answer(db.Model):
+class Answer(UserMixin,db.Model):
     __tablename__ = 'answer'
     id = db.Column(db.Integer,primary_key=True,autoincrement=True)
     content = db.Column(db.Text,nullable=False)

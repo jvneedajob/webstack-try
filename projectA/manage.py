@@ -9,7 +9,6 @@ import config
 import coverage
 
 
-
 app.config.from_object(config)
 manager = Manager(app)
 

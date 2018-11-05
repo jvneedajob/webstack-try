@@ -3,7 +3,7 @@ import os
 from datetime import timedelta
 DEBUG = True
 
-#SERVER_NAME = 'freshfly.dev:5000'
+#SERVER_NAME = 'freshfly.dev.com:71'
 SECRET_KEY = os.urandom(24)
 PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 
