@@ -7,34 +7,32 @@
 {%endblock%}
 
 {%block body%} <h4 class="page-title">菜鳥們!! 勇敢去闖出你的一片天吧~</h4>
-<form action="" method="POST" novalidate>
-    <form action="" method="POST">
-        {{form.hidden_tag()}}
-        <div class="form-container">
-            <div class='form-group'>
-                <p>
-                {{form.username.label}}
-                {{form.username()}}
-                {% for error in form.username.errors %}
-                <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-                </p>
-            </div>
-            <div class='form-group'>
-                <p>
-                {{ form.password.label }}
-                {{ form.password() }}
-                {% for error in form.password.errors %}
-                <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-                </p>
-            </div>
-            <div class='form-group'>
-                <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
-                <p>{{ form.submit() }}</p>
-            </div>
+<form action="" method="post" novalidate>
+    <div class="form-container">
+        {{ form.hidden_tag() }}
+        <div class='form-group'>
+            <p>
+            {{form.username.label}}
+            {{form.username()}}
+            {% for error in form.username.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+            </p>
         </div>
-    </form>
+        <div class='form-group'>
+            <p>
+            {{ form.password.label }}
+            {{ form.password() }}
+            {% for error in form.password.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+            </p>
+        </div>
+        <div class='form-group'>
+            <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+            <p>{{ form.submit() }}</p>
+        </div>
+    </div>
 </form>
 {%with messages = get_flashed_messages()%}
     {%for message in messages%}

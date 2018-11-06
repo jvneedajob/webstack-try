@@ -5,6 +5,7 @@ DEBUG = True
 
 #SERVER_NAME = 'freshfly.dev.com:71'
 SECRET_KEY = os.urandom(24)
+WTF_CSRF_SECRET_KEY = 'always debug'
 PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 
 DIELECT= 'mysql'

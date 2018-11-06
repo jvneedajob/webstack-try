@@ -4,6 +4,7 @@ logo圖片引用:最酷的背包菜鳥log
 主要架構引用:bootstrap.com
 
 '''
+from datetime import datetime as dt
 from flask import Flask,render_template, request, url_for , redirect, session, g , flash
 from model import User,Question,Answer
 import config
@@ -12,7 +13,7 @@ from exts import db
 from sqlalchemy import or_
 from auth.auth import bp
 from auth import auth
-from form import LoginForm,RegistrationForm
+from form import LoginForm,RegistrationForm,EditProfileForm
 from flask_login import  current_user , login_user ,logout_user , LoginManager,login_required
 from werkzeug.urls import url_parse
 
@@ -61,34 +62,20 @@ def login():
     #------------------------
     # print('以下是wtf表單創建的')
     if current_user.is_authenticated:
-        print('1.1')
         return redirect(url_for('index'))
-        print('1')
     form = LoginForm()
-    if form.validate_on_submit:
-        print('2')
+    if form.validate_on_submit():  #!!!!!加入wtf專用密鑰才能通過
         user = User.query.filter_by(username=form.username.data).first()
-        print('3')
-        if user is None:
-            flash(u'請輸入帳號及密碼')
-            return render_template('login.html',form=form)
-        if not user.check_password(form.password.data):
-            flash(u'帳號或密碼錯誤，請重新輸入')
-            print('3')
+        if user is None or not user.check_password(form.password.data):
+            flash(u'帳號、密碼有誤！')
             return render_template('login.html',form=form)
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
-        print('4')
         if not next_page or url_parse(next_page).netloc != '':
-            print('5')
             next_page = url_for('index')
-        return redirect(next_page)
-        print('6')
+            return redirect(next_page)
     return render_template('login.html', form=form)
-
     
-    
-
 @app.route('/regist/',methods = ["GET","POST"])
 def regist():
     # if request.method == 'GET':
@@ -125,27 +112,44 @@ def regist():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = RegistrationForm()
-    print('1')
     if form.validate_on_submit(): #沒()這個符號, form不會開機過濾
         print('1.1')##不通過的原因為{{ form.csrf_token }}
         username=form.username.data
         password=form.password1.data
-        print('1.2')
         email=form.email.data
-        print('2')
         if username and password and email:
             user = User(username=username,password=password,email=email)
-            print('2.2')
-                # # password = user.set_password(password)
-            print('2.1')
             db.session.add(user)
-            print('2.3')
             db.session.commit()
-            print('3')
             flash(u'註冊成功')
-            print('3.1')
             return redirect(url_for('login'))
     return render_template('regist.html',form=form)
+
+@app.route('/user/<username>')
+@login_required
+def user(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    posts = [
+        {'author': user, 'body': '測試#1'},
+        {'author': user, 'body': '測試#2'}
+    ]
+    return render_template('user.html', user=user, posts=posts)
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        if form.username.data and form.about_me.data:
+            current_user.username = form.username.data
+            current_user.about_me = form.about_me.data
+            db.session.commit()
+            flash(u'更改完成')
+            return redirect(url_for('edit_profile'))
+        elif request.method == 'GET':
+            form.username.data = current_user.username
+            form.about_me.data = current_user.about_me
+    return render_template('edit_profile.html',form=form)
 
 @app.route('/question/',methods = ["GET","POST"])
 @login_required
@@ -198,8 +202,13 @@ def my_context_processor():
         return {}
 
 @app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = dt.utcnow()
+        db.session.commit()
+@app.before_request  ##一個def對一個@before-request
 def my_before_request():
-    #user_id = session['user_id']
+#     #user_id = session['user_id']
     user_id = session.get('user_id')
     if user_id:
         user = User.query.filter(User.id == user_id).first()
